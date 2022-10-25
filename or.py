@@ -1,10 +1,22 @@
+import os
 import pandas as pd
 from  utlis.all_utils import prepare_data , save_plot
 from  utlis.model import Perceptron
+import logging
 
+gate = "OR gate"
+log_dir = "logs"
+os.makedirs(log_dir, exist_ok=True)
+logging.basicConfig(
+    filename=os.path.join(log_dir,"running_logs.log"),
+    level= logging.INFO,
+    format='[%(asctime)s:%(levelname)s:%(module)s]:%(message)s',
+    filemode='a'
+    )
 def main(data,modelName,plotName,eta,epochs):
-    df_OR = pd.DataFrame(data)
-    x, y = prepare_data(df_OR)
+    df = pd.DataFrame(data)
+    logging.info('this is raw data set:\n{df}')
+    x, y = prepare_data(df)
 
     model_OR = Perceptron(eta=eta, epochs=epochs)
     model_OR.fit(x, y)
@@ -13,7 +25,7 @@ def main(data,modelName,plotName,eta,epochs):
 
     model_OR.save(filename=modelName, model_dir="model_or")
 
-    save_plot(df_OR, model_OR, filename=plotName)
+    save_plot(df, model_OR, filename=plotName)
 
 
 if __name__ == "__main__":
@@ -27,6 +39,13 @@ if __name__ == "__main__":
   }
   ETA =0.3
   EPOCHS =10
-  main(data=OR, modelName="or.model",plotName= "or.png", eta =ETA,epochs =EPOCHS)
+  try:
+      logging.info(">>>>> starting training {gate} >>>>")
+      main(data=OR, modelName="or.model",plotName= "or.png", eta =ETA,epochs =EPOCHS)
+      logging.info(f"<<<<<done training for {gate}<<<<<\n\n")
+  except Exception as e:
+      logging.exception(e)
+      raise e
+
 
 
